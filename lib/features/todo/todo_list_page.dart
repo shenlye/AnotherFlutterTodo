@@ -3,6 +3,9 @@ import 'models/todo_item.dart';
 import 'widgets/todo_list_item.dart';
 import 'widgets/add_todo_input.dart';
 import 'services/daily_quote_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
+
 class TodoListPage extends StatefulWidget {
   const TodoListPage({super.key});
 
@@ -17,10 +20,31 @@ class _TodoListPageState extends State<TodoListPage> {
   final DailyQuoteService _dailyQuoteService = DailyQuoteService();
   late Future<String> _quoteFuture;
 
+  Future<void> _saveData() async {
+    final prefs = await SharedPreferences.getInstance();
+    final List<String> jsonList = _todoItems.map((item) => jsonEncode(item.toJson())).toList();
+    await prefs.setStringList('todo_items', jsonList);
+  }
+
+  Future<void> _loadData() async {
+    final prefs = await SharedPreferences.getInstance();
+    List<String>? jsonList = prefs.getStringList('todo_items');
+    if (jsonList != null) {
+      setState(() {
+        _todoItems.clear();
+        _todoItems.addAll(jsonList.map((jsonString) {
+          final Map<String, dynamic> json = Map<String, dynamic>.from(jsonDecode(jsonString));
+          return TodoItem.fromJson(json);
+        }));
+      });
+    }
+  }
+
   @override
   void initState() {
     super.initState();
     _quoteFuture = _dailyQuoteService.fetchDailyQuote();
+    _loadData();
   }
 
   @override
@@ -32,6 +56,7 @@ class _TodoListPageState extends State<TodoListPage> {
   void _toggleTodoItem(int index) {
     setState(() {
       _todoItems[index].toggle();
+      _saveData();
     });
   }
 
@@ -45,6 +70,7 @@ class _TodoListPageState extends State<TodoListPage> {
           ),
         );
         _textController.clear();
+        _saveData();
       }
       _showInput = false;
     });
@@ -53,6 +79,7 @@ class _TodoListPageState extends State<TodoListPage> {
   void _deleteTodoItem(int index) {
     setState(() {
       _todoItems.removeAt(index);
+      _saveData();
     });
   }
 
