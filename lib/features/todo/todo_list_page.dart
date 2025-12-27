@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'models/todo_item.dart';
 import 'widgets/todo_list_item.dart';
 import 'widgets/add_todo_input.dart';
-
+import 'services/daily_quote_service.dart';
 class TodoListPage extends StatefulWidget {
   const TodoListPage({super.key});
 
@@ -14,6 +14,14 @@ class _TodoListPageState extends State<TodoListPage> {
   final List<TodoItem> _todoItems = [];
   bool _showInput = false;
   final TextEditingController _textController = TextEditingController();
+  final DailyQuoteService _dailyQuoteService = DailyQuoteService();
+  late Future<String> _quoteFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _quoteFuture = _dailyQuoteService.fetchDailyQuote();
+  }
 
   @override
   void dispose() {
@@ -47,11 +55,31 @@ class _TodoListPageState extends State<TodoListPage> {
     return Scaffold(
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       appBar: AppBar(
-        title: const Column(
+        title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Todo List'),
-            Text('这个地方打算用来显示每日一言', style: TextStyle(fontSize: 12)),
+            const Text('Todo List'),
+            FutureBuilder<String>(
+              future: _quoteFuture,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Text(
+                    '加载中...',
+                    style: TextStyle(fontSize: 12),
+                  );
+                } else if (snapshot.hasError) {
+                  return Text(
+                    '加载失败，但是问题不大',
+                    style: TextStyle(fontSize: 12),
+                  );
+                } else {
+                  return Text(
+                    snapshot.data ?? '今日无言',
+                    style: TextStyle(fontSize: 12),
+                  );
+                }
+              },
+            )
           ],
         ),
         backgroundColor: Colors.tealAccent,
