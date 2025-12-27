@@ -9,20 +9,26 @@ class TodoListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Row(
-        children: [
-          Checkbox(value: item.isChecked, onChanged: (v) => onToggle()),
-          Expanded(
-            child: Text(
-              item.content,
-              style: item.isChecked
-                  ? const TextStyle(decoration: TextDecoration.lineThrough)
-                  : null,
+    return Card(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16.0),
+      ),
+      margin: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
+      child: Padding(
+        padding: const EdgeInsets.all(2.0),
+        child: Row(
+          children: [
+            Checkbox(value: item.isChecked, onChanged: (v) => onToggle()),
+            Expanded(
+              child: Text(
+                item.content,
+                style: item.isChecked
+                    ? const TextStyle(decoration: TextDecoration.lineThrough)
+                    : null,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
