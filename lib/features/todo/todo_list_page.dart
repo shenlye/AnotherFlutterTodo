@@ -50,6 +50,12 @@ class _TodoListPageState extends State<TodoListPage> {
     });
   }
 
+  void _deleteTodoItem(int index) {
+    setState(() {
+      _todoItems.removeAt(index);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -96,6 +102,7 @@ class _TodoListPageState extends State<TodoListPage> {
             return TodoListItem(
               item: _todoItems[index],
               onToggle: () => _toggleTodoItem(index),
+              onDelete: () => _deleteTodoItem(index),
             );
           },
         ),
